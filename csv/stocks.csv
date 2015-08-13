@@ -1,0 +1,4 @@
+id,product_id,first_description_id,second_description_id,third_description_id,unit_id,quantity,minimum_quantity,brand_id,supplier_id,price,bought
+3,1,2,,,1,5,20,1,1,1.43,1
+4,1,1,,,1,5,20,1,1,1.43,0
+5,1,2,,,1,5,20,1,1,1.43,0
