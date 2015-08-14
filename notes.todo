@@ -1,0 +1,10 @@
+featured vs non-featured products
+shiiping date for orders
+date received
+statistics
+favourites
+ratings
+correct buyer_type under Supplier to supplier_type
+product out of stock
+correct second and third descriptions in Stock model
+add a bought field to the Stock model
