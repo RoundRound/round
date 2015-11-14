@@ -51,14 +51,8 @@
                     {{ order.stock.product.name }}
                     </div>
                   <div class="">
-<<<<<<< HEAD
-                   Price: ${{ order.price }}<br>
-                    Order No: {{ order.id }} <br><br>
-                    
-=======
                     Order No: {{ order.id }} <br>
                     Price: ${{ order.price }}<br><br>
->>>>>>> 441cc7536bd911f4f239fae3ec0b8f33bc316598
                     <div class="ui info" >
                       <i class="info circle icon"></i>
                       Still waiting for {{ order.stock.minimum_quantity - Order.select(fn.sum(Order.quantity)).where(Order.stock==order.stock.id).scalar() }} units to be ordered
@@ -78,11 +72,7 @@
           Notifications &nbsp
           <div class="floating circular ui red label">{{ current_user.orders.where(Order.ready==True).count() }}</div>
 
-<<<<<<< HEAD
-        <div class="menu" tabindex="-1" style="height: 400px; overflow-y: scroll;">  
-=======
         <div class="menu" tabindex="-1" style="height: 400px; overflow-y: scroll;">
->>>>>>> 441cc7536bd911f4f239fae3ec0b8f33bc316598
             <div class="header">
               Search Notifications
             </div>
@@ -123,34 +113,23 @@
 
     <div class="ui segment">
       <div class="ui fluid dropdown selection multiple" tabindex="0">
-        <select name="skills" multiple="">
-          <option value="">Skills</option>
-          <option value="angular">Angular</option>
-          <option value="css">CSS</option>
-          <option value="design">Graphic Design</option>
-          <option value="ember">Ember</option>
-          <option value="html">HTML</option>
-          <option value="ia">Information Architecture</option>
-          <option value="javascript">Javascript</option>
-          <option value="mech">Mechanical Engineering</option>
-          <option value="meteor">Meteor</option>
-          <option value="node">NodeJS</option>
-          <option value="plumbing">Plumbing</option>
-          <option value="python">Python</option>
-          <option value="rails">Rails</option>
-          <option value="react">React</option>
-          <option value="repair">Kitchen Repair</option>
-          <option value="ruby">Ruby</option>
-          <option value="ui">UI Design</option>
-          <option value="ux">User Experience</option>
-        </select><i class="dropdown icon"></i><div class="default text">Skills</div><div class="menu" tabindex="-1"><div class="item" data-value="angular">Angular</div><div class="item" data-value="css">CSS</div><div class="item" data-value="design">Graphic Design</div><div class="item" data-value="ember">Ember</div><div class="item" data-value="html">HTML</div><div class="item" data-value="ia">Information Architecture</div><div class="item" data-value="javascript">Javascript</div><div class="item" data-value="mech">Mechanical Engineering</div><div class="item" data-value="meteor">Meteor</div><div class="item" data-value="node">NodeJS</div><div class="item" data-value="plumbing">Plumbing</div><div class="item" data-value="python">Python</div><div class="item" data-value="rails">Rails</div><div class="item" data-value="react">React</div><div class="item" data-value="repair">Kitchen Repair</div><div class="item" data-value="ruby">Ruby</div><div class="item" data-value="ui">UI Design</div><div class="item" data-value="ux">User Experience</div></div></div>
+        <select name="skills" multiple="">          
+        </select>
+
+        <i class="dropdown icon"></i>
+        <div class="default text">Skills</div>
+        <div class="menu" tabindex="-1">
+           {% for tag in tags %}
+            <div class="item" data-value="{{ tag.lower() }}">{{ tag }}</div>
+          {% endfor %}
+        </div>
     </div>
 
     <div class="ui padded grid">
       <div class="eight wide column">
+        {% for stock in stocks %}
         <div class="ui segment">
-           <div class="ui divided items">
-            {% for stock in stocks %}
+           <div class="ui divided items">            
               <div class="item">
                 <div class="ui small image">
                   <img src="static/img/shop-placeholder.png">
@@ -211,15 +190,9 @@
                   </div>
                 </div>
               </div>
-              {% endfor %}
-              <script type="text/javascript">
-                function order(stock_id){
-                  var quantity = document.getElementById('order-'+ stock_id);
-                  window.location = '/order/'+ stock_id + '/' + quantity.value;
-                }
-              </script>
             </div>
         </div>
+         {% endfor %}
       </div>
       <div class="eight wide column"></div>
     </div>
@@ -233,5 +206,12 @@
         .dropdown()
       ;
     </script>
+
+  <script type="text/javascript">
+                function order(stock_id){
+                  var quantity = document.getElementById('order-'+ stock_id);
+                  window.location = '/order/'+ stock_id + '/' + quantity.value;
+                }
+              </script>
 </body>
 </html>

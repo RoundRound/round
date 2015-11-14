@@ -5,6 +5,17 @@ $('.ui.dropdown').dropdown();
 
 //drop down for selecting age group
 
+$('.ui.normal.dropdown')
+  .dropdown({
+    maxSelections: 3
+  })
+;
+$('.ui.special.dropdown')
+  .dropdown({
+    useLabels: false,
+    maxSelections: 3
+  })
+;
 
 $('.ui.dropdown').dropdown();
 

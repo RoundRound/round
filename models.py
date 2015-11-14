@@ -1,6 +1,7 @@
 import datetime
 
 from peewee import *
+from flask.ext.login import UserMixin
 
 
 DB = SqliteDatabase('peewee.db')
@@ -9,12 +10,13 @@ class BaseModel(Model):
 	class meta:
 		database = DB
 
-class Buyer(BaseModel):
-	name = CharField()
+class User(BaseModel, UserMixin):
+	username = CharField()
 	phone = IntegerField()
 	email = CharField(unique=True, max_length=140)
 	password = CharField(max_length=50)
-	buyer_type = CharField(max_length=50, default='free')
+	profile = TextField() 
+	account_type = CharField(max_length=50)
 	address = TextField()
 	longitude = DoubleField(null=True)
 	latitude = DoubleField(null=True)
@@ -22,69 +24,22 @@ class Buyer(BaseModel):
 	date_joined = DateTimeField(default=datetime.datetime.now)
 
 	@classmethod
-	def create_buyer(cls, name='tatenda', phone=775527640, email='tatendazimba@gmail.com',
-		password='tatenda',	address='77 Quorn Avenue, Mount Pleasant, Harare, Zimbabwe'):
+	def create_user(cls, username='tatenda', phone=775527640, email='tatendazimba@gmail.com', account_type='buyer',
+		password='tatenda',	address='77 Quorn Avenue, Mount Pleasant, Harare, Zimbabwe', profile='default.png'):
 
-		cls.create(name=name, phone=phone, email=email,
+		cls.create(username=username, phone=phone, email=email, profile=profile, account_type=account_type,
 			password=password, address=address)
 
-class Supplier(BaseModel):
-	name = CharField()
-	phone = IntegerField()
-	email = CharField(unique=True, max_length=140)
-	password = CharField(max_length=50)
-	buyer_type = CharField(max_length=50, default='free')
-	address = TextField()
-	longitude = DoubleField(null=True)
-	latitude = DoubleField(null=True)
-	rating = DoubleField(default=0)
-	date_joined = DateTimeField(default=datetime.datetime.now)
+class Suggestion(BaseModel):
+	suggestion = TextField()
+	user = ForeignKeyField(User, related_name="suggestions")
+	date = DateTimeField(default=datetime.datetime.now)	
+	scale = IntegerField()
 
 	@classmethod
-	def create_supplier(cls, name='GMB', phone=775527640, email='orders@gmb.com',
-		password='tatenda',	address='77 Workington Road, Harare, Zimbabwe'):
+	def make_suggestion(cls, suggestion, user, scale):
+		cls.create(suggestion=suggestion, user=user, scale=scale)
 
-		cls.create(name=name, phone=phone, email=email,
-			password=password, address=address)
-
-class Courier(BaseModel):
-	name = CharField()
-	phone = IntegerField()
-	email = CharField(unique=True, max_length=140)
-	password = CharField(max_length=50)
-	buyer_type = CharField(max_length=50, default='free')
-	address = TextField()
-	longitude = DoubleField(null=True)
-	latitude = DoubleField(null=True)
-	rating = DoubleField(default=0)
-	date_joined = DateTimeField(default=datetime.datetime.now)
-
-	@classmethod
-	def create_courier(cls, name='Sabot', phone=775527640, email='courier@sabot.com',
-		password='tatenda',	address='77 Mutare Road, Harare, Zimbabwe'):
-
-		cls.create(name=name, phone=phone, email=email,
-			password=password, address=address)
-
-class Staff(BaseModel):
-	name = CharField()
-	phone = IntegerField()
-	email = CharField(unique=True, max_length=140)
-	password = CharField(max_length=50)
-	buyer_type = CharField(max_length=50, default='free')
-	address = TextField()
-	longitude = DoubleField(null=True)
-	latitude = DoubleField(null=True)
-	role = CharField(max_length=50, default='clerk')
-	is_admin = BooleanField(default=False)
-	date_joined = DateTimeField(default=datetime.datetime.now)
-
-	@classmethod
-	def create_staff(cls, name='tawanda', phone=775527640, email='tawandazimba@gmail.com',
-		password='tatenda',	address='77 Quorn Avenue, Mount Pleasant, Harare, Zimbabwe'):
-
-		cls.create(name=name, phone=phone, email=email,
-			password=password, address=address)
 
 class Product(BaseModel):
 	name = CharField(unique=True)
@@ -99,7 +54,7 @@ class Unit(BaseModel):
 	short_name = CharField(max_length=10, unique=True)
 
 	@classmethod
-	def create_unit(cls, long_name='kilogrammes', short_name='KG'):
+	def create_unit(cls, long_name, short_name):
 		cls.create(long_name=long_name, short_name=short_name)
 
 class Descriptor(BaseModel):
@@ -111,10 +66,10 @@ class Descriptor(BaseModel):
 
 class Brand(BaseModel):
 	name = CharField(max_length=140, unique=True)
-	image = TextField(unique=True)
+	image = TextField()
 
 	@classmethod
-	def create_brand(cls, name, image):
+	def create_brand(cls, name, image='shop-placeholder.png'):
 		cls.create(name=name, image=image)
 
 class Stock(BaseModel):
@@ -123,16 +78,17 @@ class Stock(BaseModel):
 	second_description = ForeignKeyField(Product, related_name='in_stock_second', null=True)
 	third_description = ForeignKeyField(Product, related_name='in_stock_third', null=True)
 	unit = ForeignKeyField(Unit, related_name='in_stock')
-	quantity = IntegerField()
-	minimum_quantity = IntegerField()
+	quantity = IntegerField() #this is the quantity of units above. e.g 9kg 9 is the quantity, kg is the units
+	minimum_quantity = IntegerField() # this is the seller's target
 	brand = ForeignKeyField(Brand, related_name='in_stock')
-	supplier = ForeignKeyField(Supplier, related_name='products')
+	supplier = ForeignKeyField(User, related_name='products')
 	price = DoubleField()
 	bought = BooleanField(default=False)
 
 	@classmethod
-	def enter_stock(cls, product, first_description, unit, brand, supplier, price,
-		second_description=None, third_description=None, minimum_quantity=500, quantity=2):
+	def enter_stock(cls, product, first_description, unit, brand, supplier, price, 
+		minimum_quantity=minimum_quantity, quantity=quantity, 
+		second_description=None, third_description=None):
 
 		cls.create(product=product, first_description=first_description,
 			second_description=second_description, third_description=third_description,
@@ -140,7 +96,7 @@ class Stock(BaseModel):
 			supplier=supplier, price=price)
 
 class Order(BaseModel):
-	buyer = ForeignKeyField(Buyer, related_name='orders')
+	buyer = ForeignKeyField(User, related_name='orders')
 	stock = ForeignKeyField(Stock, related_name='orders')
 	quantity = IntegerField()
 	price = DoubleField()
@@ -155,6 +111,5 @@ class Order(BaseModel):
 		cls.create(buyer=buyer, stock=stock, quantity=quantity, price=price)
 
 if __name__ == '__main__':
-	DB.create_tables([Buyer, Supplier, Courier, Staff, Product, Unit, Descriptor,
-		Brand, Stock, Order], safe=True)
+	DB.create_tables([User, Product, Unit, Descriptor, Brand, Stock, Order, Suggestion], safe=True)
 	print('Database successfully created!')
