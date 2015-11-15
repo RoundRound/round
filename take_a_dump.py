@@ -10,7 +10,6 @@ try:
 except FileExistsError:
 	pass
 
-
 db = sqlite3.connect('peewee.db')
 
 for table in DB.get_tables():
